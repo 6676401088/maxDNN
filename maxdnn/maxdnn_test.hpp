@@ -12,5 +12,6 @@ bool noTest();
 int getConvIters();
 int getCooldown();
 int getTestDevice();
+size_t getMaxWorkspaceSize();
 
 #endif

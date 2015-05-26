@@ -8,6 +8,7 @@ Licensed under the MIT License
 #include "maxdnn/GpuData.hpp"
 #include "maxdnn/profile.hpp"
 #include "maxdnn/TensorOperations.hpp"
+#include "maxdnn/maxdnn_test.hpp"
 #include <stdint.h>
 
 namespace maxdnn
@@ -88,7 +89,6 @@ namespace maxdnn
                                                                conv_h,
                                                                output_h,
                                                                CUDNN_CONVOLUTION_FWD_PREFER_FASTEST,
-//                                                               CUDNN_CONVOLUTION_FWD_NO_WORKSPACE,
                                                                0,
                                                                &algo));
 
@@ -100,6 +100,26 @@ namespace maxdnn
                                                                    output_h,
                                                                    algo,
                                                                    &workspaceNumBytes));
+
+        // There is a bug in cuDNN v.2 that sometimes causes the above
+        // function to return an outrageously large workspace size,
+        // within a few GB of (size_t)-1. This has been reported on
+        // GM107. Therefore we must check whether the workspace size
+        // exceeds a sane maximum, and if not, fall back to the "no
+        // workspace algorithm." You can override the default maximum
+        // workspace size using the "maxdnn_max_workspace_size"
+        // environment variable if you wish (unit is bytes).
+        if (workspaceNumBytes >= getMaxWorkspaceSize()) {
+            workspaceNumBytes = 0;
+            MAXDNN_CUDNN_CHECK(cudnnGetConvolutionForwardAlgorithm(handle,
+                                                                   input_h,
+                                                                   kernels_h,
+                                                                   conv_h,
+                                                                   output_h,
+                                                                   CUDNN_CONVOLUTION_FWD_NO_WORKSPACE,
+                                                                   0,
+                                                                   &algo));
+        }
 
         Tensor<uint8_t> workspace(1, 1, 1, workspaceNumBytes, GpuData::prototype());
 
