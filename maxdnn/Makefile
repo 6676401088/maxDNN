@@ -14,7 +14,7 @@ EXTERNALS=$(HOME)/develop/externals
 CUDA_PATH=/usr/local/cuda
 CUDNN_PATH=$(EXTERNALS)/cudnn-6.5-linux-x64-v2-rc2
 UNITTEST_PATH=/usr/local/include/UnitTest++
-MAXAS_PATH=$(EXTERNALS)/maxas
+MAXAS_PATH=$(EXTERNALS)/maxas/bin
 
 INCLUDE=-I.. -I$(UNITTEST_PATH) -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc -I. -I$(CUDNN_PATH)
 
